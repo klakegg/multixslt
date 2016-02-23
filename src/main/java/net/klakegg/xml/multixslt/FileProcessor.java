@@ -10,6 +10,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -38,7 +39,7 @@ public class FileProcessor {
             logger.info("File: {}", path);
 
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Multixslt multixslt = (Multixslt) unmarshaller.unmarshal(Files.newBufferedReader(path));
+            Multixslt multixslt = (Multixslt) unmarshaller.unmarshal(Files.newBufferedReader(path, StandardCharsets.UTF_8));
 
             for (StylesheetType stylesheet : multixslt.getStylesheet()) {
                 new StylesheetProcessor(path.getParent(), stylesheet).perform();
