@@ -1,5 +1,16 @@
 language: java
+
 jdk:
   - oraclejdk7
   - oraclejdk8
   - openjdk7
+
+after_success:
+  - mv target/*.jar ./
+
+addons:
+  artifacts:
+    s3_region: "eu-west-1"
+    target_paths: projects/xml-multixslt
+    paths:
+      - $(ls xml-multixslt*.jar | tr "\n" ":")

@@ -31,8 +31,6 @@ public class Main {
         final List<String> files = cli.getArgList();
 
         if (cli.hasOption("recursive")) {
-            logger.info("{}", files);
-
             try {
                 Files.walkFileTree(home, new SimpleFileVisitor() {
                     @Override
