@@ -29,6 +29,8 @@ public class Main {
         logger.debug("Home folder: {}", home.toAbsolutePath());
 
         final List<String> files = cli.getArgList();
+        if (files.size() == 0)
+            files.add("multixslt.xml");
 
         if (cli.hasOption("recursive")) {
             try {

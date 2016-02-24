@@ -1,10 +1,9 @@
 package net.klakegg.xml.multixslt;
 
-import net.klakegg.xsd.xml.multixslt._1.Multixslt;
+import net.klakegg.xsd.xml.multixslt._1.Manifest;
 import net.klakegg.xsd.xml.multixslt._1.StylesheetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -22,7 +21,7 @@ public class FileProcessor {
 
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(Multixslt.class);
+            jaxbContext = JAXBContext.newInstance(Manifest.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -39,10 +38,10 @@ public class FileProcessor {
             logger.info("File: {}", path);
 
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Multixslt multixslt = (Multixslt) unmarshaller.unmarshal(Files.newBufferedReader(path, StandardCharsets.UTF_8));
+            Manifest manifest = (Manifest) unmarshaller.unmarshal(Files.newBufferedReader(path, StandardCharsets.UTF_8));
 
-            for (StylesheetType stylesheet : multixslt.getStylesheet()) {
-                new StylesheetProcessor(path.getParent(), stylesheet).perform();
+            for (StylesheetType stylesheet : manifest.getStylesheet()) {
+                new StylesheetProcessor(path.getParent(), stylesheet, manifest.getParameter()).perform();
             }
         } catch (JAXBException | IOException e) {
             logger.error(e.getMessage(), e);

@@ -14,6 +14,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class StylesheetProcessor {
 
@@ -21,10 +22,12 @@ public class StylesheetProcessor {
 
     private Path path;
     private StylesheetType stylesheet;
+    private List<ParameterType> fileParameters;
 
-    public StylesheetProcessor(Path path, StylesheetType stylesheet) {
+    public StylesheetProcessor(Path path, StylesheetType stylesheet, List<ParameterType> parameters) {
         this.path = path;
         this.stylesheet = stylesheet;
+        this.fileParameters = parameters;
     }
 
     public void perform() {
@@ -39,6 +42,8 @@ public class StylesheetProcessor {
 
             for (FileType file : stylesheet.getFile()) {
                 transformer.clearParameters();
+                for (ParameterType parameter : fileParameters)
+                    transformer.setParameter(parameter.getKey(), parameter.getValue());
                 for (ParameterType parameter : stylesheet.getParameter())
                     transformer.setParameter(parameter.getKey(), parameter.getValue());
                 for (ParameterType parameter : file.getParameter())

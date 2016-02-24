@@ -2,7 +2,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
            targetNamespace="http://klakegg.net/xsd/xml/multixslt/1.0" xmlns="http://klakegg.net/xsd/xml/multixslt/1.0">
 
-    <xs:element name="multixslt">
+    <xs:element name="manifest">
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="parameter" type="parameterType" minOccurs="0" maxOccurs="unbounded"/>
