@@ -25,7 +25,7 @@ public class StylesheetProcessor {
 
     public static void perform(Path path, StylesheetType stylesheet, List<ParameterType> manifestParameters) {
         try {
-            final Path src = path.resolve(stylesheet.getSrc());
+            Path src = path.resolve(stylesheet.getSrc());
 
             // Creating transformer factory
             TransformerFactory transformerFactory = new TransformerFactoryImpl();
@@ -54,7 +54,7 @@ public class StylesheetProcessor {
                 Result result = new StreamResult(Files.newOutputStream(path.resolve(filename)));
 
                 // Transform
-                logger.info("[{}] Process {} => {}", src, file.getSrc(), filename);
+                logger.info("{} + {} => {}", src, file.getSrc(), filename);
                 transformer.transform(source, result);
             }
         } catch (IOException | TransformerException e) {

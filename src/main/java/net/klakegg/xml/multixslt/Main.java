@@ -1,30 +1,41 @@
 package net.klakegg.xml.multixslt;
 
-import org.apache.commons.cli.*;
+import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+@SuppressWarnings("unused")
 public class Main {
 
-    public static void main(String... args) throws ParseException, IOException {
-        Options options = new Options();
-        options.addOption("f", "folder", true, "Folder");
-        options.addOption("r", "recursive", false, "Recursive traverse for files.");
+    public static void main(String... args) throws Exception {
+        new Main().run(args);
+    }
 
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cli = parser.parse(options, args);
+    @Option(name = "--folder", aliases = "-f", usage = "Folder")
+    private String folder;
+    @Option(name = "--recursive", aliases = "-r", usage = "Recursive traverse for files.")
+    private boolean recursive;
+    @Argument
+    private List<String> files;
 
-        Path home = Paths.get(cli.getOptionValue("folder", ""));
+    public void run(String... args) throws Exception {
+        // Parse arguments
+        new CmdLineParser(this).parseArgument(args);
 
-        List<String> files = cli.getArgList();
-        if (files.isEmpty())
-            files.add("multixslt.xml");
+        // Populate files if not set
+        files = Optional.ofNullable(files).orElse(Collections.singletonList("multixslt.xml"));
 
-        if (cli.hasOption("recursive")) {
+        // Detect home folder.
+        Path home = Paths.get(Optional.ofNullable(folder).orElse(""));
+
+        if (recursive) {
             Files.walk(home)
                     .filter(Files::isRegularFile)
                     .filter(p -> files.contains(p.getFileName().toString()))
