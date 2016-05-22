@@ -6,15 +6,15 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class FileProcessor {
+public class ManifestProcessor {
 
-    private static Logger logger = LoggerFactory.getLogger(FileProcessor.class);
+    private static Logger logger = LoggerFactory.getLogger(ManifestProcessor.class);
 
     private static JAXBContext jaxbContext;
 
@@ -26,21 +26,14 @@ public class FileProcessor {
         }
     }
 
-    private Path path;
-
-    public FileProcessor(Path path) {
-        this.path = path;
-    }
-
-    public void perform() {
+    public static void perform(Path path) {
         try {
-            logger.info("File: {}", path);
+            Manifest manifest = jaxbContext.createUnmarshaller()
+                    .unmarshal(new StreamSource(Files.newBufferedReader(path, StandardCharsets.UTF_8)), Manifest.class)
+                    .getValue();
 
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Manifest manifest = (Manifest) unmarshaller.unmarshal(Files.newBufferedReader(path, StandardCharsets.UTF_8));
-
-            manifest.getStylesheet().parallelStream().forEach(s ->
-                new StylesheetProcessor(path.getParent(), s, manifest.getParameter()).perform());
+            manifest.getStylesheet().parallelStream()
+                    .forEach(s -> StylesheetProcessor.perform(path.getParent(), s, manifest.getParameter()));
         } catch (JAXBException | IOException e) {
             logger.error(e.getMessage(), e);
         }

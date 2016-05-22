@@ -1,8 +1,5 @@
 package net.klakegg.xml.multixslt.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
@@ -12,8 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class PathURIResolver implements URIResolver {
-
-    private static Logger logger = LoggerFactory.getLogger(PathURIResolver.class);
 
     private Path path;
 
@@ -26,8 +21,7 @@ public class PathURIResolver implements URIResolver {
         try {
             return new StreamSource(Files.newInputStream(path.resolve(href)));
         } catch (IOException e) {
-            logger.warn(e.getMessage(), e);
-            return null;
+            throw new TransformerException(e.getMessage(), e);
         }
     }
 }
