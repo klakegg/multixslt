@@ -14,6 +14,8 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class StylesheetProcessor {
@@ -22,43 +24,45 @@ public class StylesheetProcessor {
 
     private Path path;
     private StylesheetType stylesheet;
-    private List<ParameterType> fileParameters;
+    private List<ParameterType> manifestParameters;
 
     public StylesheetProcessor(Path path, StylesheetType stylesheet, List<ParameterType> parameters) {
         this.path = path;
         this.stylesheet = stylesheet;
-        this.fileParameters = parameters;
+        this.manifestParameters = parameters;
     }
 
     public void perform() {
         try {
             final Path src = path.resolve(stylesheet.getSrc());
 
+            // Creating transformer factory
             TransformerFactory transformerFactory = new TransformerFactoryImpl();
             transformerFactory.setURIResolver(new PathURIResolver(src.getParent()));
 
-            logger.info("Loading {}", src);
+            // Creating transformer
             Transformer transformer = transformerFactory.newTransformer(new StreamSource(Files.newInputStream(src)));
 
             for (FileType file : stylesheet.getFile()) {
+                // Clear parameters
                 transformer.clearParameters();
-                for (ParameterType parameter : fileParameters)
-                    transformer.setParameter(parameter.getKey(), parameter.getValue());
-                for (ParameterType parameter : stylesheet.getParameter())
-                    transformer.setParameter(parameter.getKey(), parameter.getValue());
-                for (ParameterType parameter : file.getParameter())
-                    transformer.setParameter(parameter.getKey(), parameter.getValue());
+
+                // Set parameters
+                Arrays.asList(manifestParameters, stylesheet.getParameter(), file.getParameter()).stream()
+                        .flatMap(Collection::stream)
+                        .forEach(p -> transformer.setParameter(p.getKey(), p.getValue()));
 
                 Source source = new StreamSource(Files.newInputStream(path.resolve(file.getSrc())));
                 Result result;
+
                 if (file.getTarget() != null) {
                     result = new StreamResult(Files.newOutputStream(path.resolve(file.getTarget())));
-                    logger.info("Process {} => {}", file.getSrc(), file.getTarget());
+                    logger.info("[{}] Process {} => {}", src, file.getSrc(), file.getTarget());
                 } else {
                     String extension = file.getExtension() == null ? "result.xml" : file.getExtension();
                     String filename = file.getSrc().substring(0, file.getSrc().lastIndexOf(".") + 1) + extension;
                     result = new StreamResult(Files.newOutputStream(path.resolve(filename)));
-                    logger.info("Process {} => {}", file.getSrc(), filename);
+                    logger.info("[{}] Process {} => {}", src, file.getSrc(), filename);
                 }
 
                 transformer.transform(source, result);

@@ -1,7 +1,6 @@
 package net.klakegg.xml.multixslt;
 
 import net.klakegg.xsd.xml.multixslt._1.Manifest;
-import net.klakegg.xsd.xml.multixslt._1.StylesheetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +39,8 @@ public class FileProcessor {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             Manifest manifest = (Manifest) unmarshaller.unmarshal(Files.newBufferedReader(path, StandardCharsets.UTF_8));
 
-            for (StylesheetType stylesheet : manifest.getStylesheet()) {
-                new StylesheetProcessor(path.getParent(), stylesheet, manifest.getParameter()).perform();
-            }
+            manifest.getStylesheet().parallelStream().forEach(s ->
+                new StylesheetProcessor(path.getParent(), s, manifest.getParameter()).perform());
         } catch (JAXBException | IOException e) {
             logger.error(e.getMessage(), e);
         }
